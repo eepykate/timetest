@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# timetest rev.1
+#  https://github.com/6gk/timetest
+#  MIT license (Expat), 6gk/gk/gtk
+
+# set default amount of times to run
+[ "$t" -gt 0 ] 2>/dev/null || t=25
+
+# reset values, and make low really high (so it'll always be overwrote)
+i=0 avg=0 high=0 low=9999999
+# only run the specified amount of times
+while [ "$i" -lt "$t" ]; do
+	i=$((i+1))
+	# print & update the run counter
+	printf "\r%s" "$i/$t" >/dev/stderr
+
+	# get time before running
+	var=$EPOCHREALTIME  # bash v5ism
+
+	# run command with arguments and silence output.
+	"$@" >/dev/null 2>&1
+
+	# change from absolute to relative time
+	# and remove the . as bash doesn't work with decimals.
+	var=$((${EPOCHREALTIME/.}-${var/.}))
+	# remove last character
+	var=${var%?}
+
+	# save for averaging/getting median later
+	avg=$var+$avg
+	# if applicable, update high/low times.
+	[ "$var" -gt "$high" ] && high=$var
+	[ "$var" -lt "$low"  ] && low=$var
+	# wait so the times are more consistent and accurate to real-world usage
+	# without this, subsequent times are generally much lower & less reflective.
+	sleep 0.5
+done
+
+# math the median (get middling time, give or take 1)
+med=$(printf "${avg//+/\\n}" | sort -n | sed -n "$((t/2))p")
+# math the average
+avg=$(((avg)/t))
+# colours
+b=$'\033[34m'  c=$'\033[36m'  r=$'\033[0m'
+# print the results
+printf "\r%b  %b  %s  %s $c|$r ms, $b$t$r runs\n" \
+	"avg=$b${avg%??}.${avg: -2}$r" \
+	"med=$b${med%??}.${med: -2}$r" \
+	"high=${high%??}.${high: -2}"  \
+	"low=${low%??}.${low: -2}"

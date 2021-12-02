@@ -1,0 +1,10 @@
+timetest
+a bash script to benchmark open -> close time of an executable
+
+examples
+ $ timetest st -e sh -c exit
+ $ t=10 timetest ./slow-program
+
+requirements
+ - bash (≥v5)
+ - POSIX-compatible sort & sed (for median)
