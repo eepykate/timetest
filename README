@@ -1,9 +1,9 @@
 timetest
-a bash script to benchmark open -> close time of an executable
+a bash script to benchmark open -> close time of a command
 
 examples
- $ timetest st -e sh -c exit
- $ t=10 timetest ./slow-program
+ $ timetest bash -c exit
+ $ times=10 delay=0.1 timetest ./a.out
 
 requirements
  - bash (≥v5)
