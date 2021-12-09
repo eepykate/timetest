@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# timetest rev.4
+# timetest rev.5
 #  https://github.com/6gk/timetest
 #  MIT license (Expat), 6gk/gk/gtk
 # shellcheck disable=2182,2059,2034,1007  ## shellcheck wrong because i am too good
@@ -33,10 +33,12 @@ while [[ "$((i++))" -lt "$times" ]]; do
 done
 
 
-# math the median (due to not being able to get half a line, it might be 1 line early sometimes)
-med=$(printf "${avg//+/\\n}" | sort -n | sed -n "$((times/2))p")
-# math the average & minmax delta
-((avg=(avg)/times,dt=high-low))
+# math: median, interquartile range, average, minmax delta
+nums=$(printf "${avg//+/\\n}" | sort -n)
+med=$(sed "$((times/2))!d"  <<< "$nums")
+q1=$(sed "$((times*1/4))!d" <<< "$nums")
+q3=$(sed "$((times*3/4))!d" <<< "$nums")
+((iqr=q3-q1, avg=(avg)/times, dt=high-low))
 # colours
 b=$'\033[34m'  c=$'\033[36m'  r=$'\033[0m'
 
@@ -45,7 +47,7 @@ num() { printf -vn %03d "${!1}"; printf "${n%??}.${n: -2}"; }
 
 printf "\r$1 $c|$r "
 printf "~$b$(num med)$r  "
-printf "±$(num dt) "
+printf "±$(num iqr) "
 #printf "⤒ $(num high)  "
 #printf "⤓ $(num low)  "
 printf "$c|$r ms, $b$times${r}x, $b$delay${r}s between\n"
