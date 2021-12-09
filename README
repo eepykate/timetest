@@ -3,15 +3,15 @@ a bash script to benchmark open -> close time of a command
 
 examples
  $ timetest bash -c exit
- $ times=10 delay=0.1 timetest ./a.out
+ $ times=36 delay=1.0 timetest ./a.out
 
 requirements
  - bash (≥v5)
  - POSIX-compatible sort & sed (for median)
 
 [1]
-quick example: st on my system (median, not avg)
-st | ~17.92  ⤒ 19.70  ⤓ 17.51 | ms, 25x, 0s   between | min-max delta of 2.19
-st | ~18.40  ⤒ 18.81  ⤓ 17.92 | ms, 25x, 0.1s between | min-max delta of 0.89
-st | ~18.32  ⤒ 18.91  ⤓ 18.06 | ms, 25x, 0.2s between | min-max delta of 0.85
-st | ~18.37  ⤒ 18.74  ⤓ 18.17 | ms, 25x, 0.5s between | min-max delta of 0.57
+quick example: st on my system (median & iqr)
+~18.29  ±1.29 | st | ms, 50x, 0s between
+~18.28  ±0.24 | st | ms, 50x, 0.1s between
+~18.27  ±0.29 | st | ms, 50x, 0.25s between
+~18.32  ±0.20 | st | ms, 50x, 0.5s between

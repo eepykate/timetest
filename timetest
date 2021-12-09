@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# timetest rev.5
+# timetest rev.6
 #  https://github.com/6gk/timetest
 #  MIT license (Expat), 6gk/gk/gtk
 # shellcheck disable=2182,2059,2034,1007  ## shellcheck wrong because i am too good
@@ -7,7 +7,7 @@
 avg=0 high= low=  i=0  n=/dev/null
 # set default for changable vars
 [ "$times"     -gt 0 ] 2>$n || times=25
-[ "${delay/.}" -ge 0 ] 2>$n || delay=0.5
+[ "${delay/.}" -ge 0 ] 2>$n || delay=0.1
 
 
 while [[ "$((i++))" -lt "$times" ]]; do
@@ -45,9 +45,10 @@ b=$'\033[34m'  c=$'\033[36m'  r=$'\033[0m'
 # print the results
 num() { printf -vn %03d "${!1}"; printf "${n%??}.${n: -2}"; }
 
-printf "\r$1 $c|$r "
+printf "\r"
 printf "~$b$(num med)$r  "
 printf "±$(num iqr) "
 #printf "⤒ $(num high)  "
 #printf "⤓ $(num low)  "
+printf "$c|$r $1 "
 printf "$c|$r ms, $b$times${r}x, $b$delay${r}s between\n"
