@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# timetest rev.3
+# timetest rev.4
 #  https://github.com/6gk/timetest
 #  MIT license (Expat), 6gk/gk/gtk
-# shellcheck disable=2059
+# shellcheck disable=2182,2059,2034,1007  ## shellcheck wrong because i am too good
 
 avg=0 high= low=  i=0  n=/dev/null
 # set default for changable vars
@@ -35,20 +35,17 @@ done
 
 # math the median (due to not being able to get half a line, it might be 1 line early sometimes)
 med=$(printf "${avg//+/\\n}" | sort -n | sed -n "$((times/2))p")
-# math the average
-((avg=(avg)/times))
-# math the delta between min&max
-((dt=high-low))
+# math the average & minmax delta
+((avg=(avg)/times,dt=high-low))
 # colours
 b=$'\033[34m'  c=$'\033[36m'  r=$'\033[0m'
 
 # print the results
-printf "\r"
-printf "$1 $c|$r "
-#printf "~$b${avg%??}.${avg: -2}$r  "
-printf "~$b${med%??}.${med: -2}$r  "
-printf "±${dt%??}.${dt: -2} "
-#printf "⤒ ${high%??}.${high: -2}  "
-#printf "⤓ ${low%??}.${low: -2} "
-printf "$c|$r ms, $b$times${r}x, $b$delay${r}s between"
-printf "\n"
+num() { printf -vn %03d "${!1}"; printf "${n%??}.${n: -2}"; }
+
+printf "\r$1 $c|$r "
+printf "~$b$(num med)$r  "
+printf "±$(num dt) "
+#printf "⤒ $(num high)  "
+#printf "⤓ $(num low)  "
+printf "$c|$r ms, $b$times${r}x, $b$delay${r}s between\n"
