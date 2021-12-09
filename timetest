@@ -1,48 +1,44 @@
 #!/usr/bin/env bash
-# timetest rev.2
+# timetest rev.3
 #  https://github.com/6gk/timetest
 #  MIT license (Expat), 6gk/gk/gtk
 # shellcheck disable=2059
 
-# reset values, and make low really high (so it'll always be overwrote)
-i=0  avg=0 high=0 low=9999999  n=/dev/null
+avg=0 high= low=  i=0  n=/dev/null
 # set default for changable vars
 [ "$times"     -gt 0 ] 2>$n || times=25
 [ "${delay/.}" -ge 0 ] 2>$n || delay=0.5
 
 
-while [ "$i" -lt "$times" ]; do
-	i=$((i+1))
-	# print & update the run counter
-	printf "\r%s" "$i/$times" >/dev/stderr
+while [[ "$((i++))" -lt "$times" ]]; do
+	printf "\r$i/$times" >/dev/stderr
 
-	# get time before running
 	var=$EPOCHREALTIME  # bash v5ism
 
-	# silently run command
-	"$@" >$n 2>&1
+	"$@" &>$n
 
-	# change from absolute to relative time
+	# math command execute time
 	# and remove the . as bash doesn't work with decimals.
-	var=$((${EPOCHREALTIME/.}-${var/.}))
+	((var=${EPOCHREALTIME/.}-${var/.}))
 	# remove last character
 	var=${var%?}
 
 	# save for averaging/getting median later
 	avg=$var+$avg
 	# if applicable, update high/low times.
-	[ "$var" -gt "$high" ] && high=$var
-	[ "$var" -lt "$low"  ] && low=$var
-	# wait so the times are more consistent and accurate to real-world usage
-	# without this, subsequent times are generally much lower & less reflective.
+	[[ "$var" -gt "$high" ]] && high=$var
+	[[ "$var" -lt "${low:=$var}" ]] && low=$var
+	# wait so the times are more consistent[1] (& therefore more accurate)
 	sleep "$delay"
 done
 
 
-# math the median (get middling time, give or take 1)
+# math the median (due to not being able to get half a line, it might be 1 line early sometimes)
 med=$(printf "${avg//+/\\n}" | sort -n | sed -n "$((times/2))p")
 # math the average
-avg=$(((avg)/times))
+((avg=(avg)/times))
+# math the delta between min&max
+((dt=high-low))
 # colours
 b=$'\033[34m'  c=$'\033[36m'  r=$'\033[0m'
 
@@ -51,6 +47,8 @@ printf "\r"
 printf "$1 $c|$r "
 #printf "~$b${avg%??}.${avg: -2}$r  "
 printf "~$b${med%??}.${med: -2}$r  "
-printf "⤒ ${high%??}.${high: -2}  "
-printf "⤓ ${low%??}.${low: -2} "
-printf "$c|$r ms, $b$times${r}x, $b$delay${r}s between\n"
+printf "±${dt%??}.${dt: -2} "
+#printf "⤒ ${high%??}.${high: -2}  "
+#printf "⤓ ${low%??}.${low: -2} "
+printf "$c|$r ms, $b$times${r}x, $b$delay${r}s between"
+printf "\n"
