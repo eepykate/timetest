@@ -3,7 +3,7 @@ a bash script to benchmark open -> close time of a command
 
 examples
  $ timetest bash -c exit
- $ times=36 delay=1.0 timetest ./a.out
+ $ times=36 delay=0.25 limit=10 timetest ./a.out
 
 requirements
  - bash (≥v5)
